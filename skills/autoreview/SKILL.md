@@ -213,6 +213,31 @@ split context overrides are unsupported when projection is selected.
 | Pi              | CLI 0.79.0+; configured model; no tools or project resources                                          |
 | Kimi            | CLI 0.30.0+; configured model; Python 3.11+ or `tomli` for TOML config                                |
 
+## Image review
+
+Branch mode with Codex supports **added, single-frame PNG, JPEG and WebP** files.
+Install Pillow in the Python environment running the helper (`python -m pip install Pillow`).
+Use a vision-capable Codex model and a CLI supporting `codex exec --image`.
+No new bypass flag is required. Full decoding rejects corrupt and animated files.
+Images must have at most 16,777,216 pixels and no dimension above 16,384 pixels;
+decoder bomb warnings fail closed before pixel loading. Added image paths are
+limited to 20 MiB of encoded bytes each and 100 MiB total, checked against Git
+object sizes before capture. Exceeding a limit fails the entire review.
+
+The helper captures exact bytes from the pinned HEAD, stages only those images
+in its isolated workspace, and attaches them through Codex's native image input.
+Every pass receives the path, media type, byte count and SHA-256 manifest alongside
+the image attachments and text diff. Image findings use the original path and line 1.
+Text-only review does not require Pillow.
+
+Other binaries, modified/deleted images, local/commit image changes and image review
+with other engines remain unsupported and fail closed. Missing Pillow or provider
+image limits fail the review rather than silently dropping assets. Sensitive-path,
+source-mutation, authentication and sandbox controls remain enabled.
+
+For partial clones, materialize required Git objects **before** review. The isolated
+Git reader intentionally disables lazy network fetching; do not weaken that boundary.
+
 ## Runtime boundaries
 
 The helper owns reviewer isolation, sanitized authentication, process cleanup,
@@ -247,7 +272,8 @@ roots before workspace, runtime, or authentication setup; unset a shared
 temporary directory. Other engines and platforms retain their normal isolation.
 Tools installed in shared scratch or requiring writes there will be denied too.
 
-Review files have no size/count cap and are never truncated. Large diffs and
+Text review files have no size/count cap and are never truncated; image inputs
+use the explicit safety limits above. Large diffs and
 datasets are partitioned automatically. Change partitions retain complete
 datasets when they fit with sufficient change space. This preference may use more
 passes or prompt bytes than evidence batching; the explicit pass budget still applies.
