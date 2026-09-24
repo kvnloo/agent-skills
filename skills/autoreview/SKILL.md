@@ -94,6 +94,26 @@ sensitive-path, symlink, and mutation checks apply. `--dataset` stays repo-relat
 Repeated paths in the same evidence role share one validated capture. Equal
 content at different paths and prompt-file versus dataset roles stay distinct.
 
+For unchanged committed source, use repeatable `--source-context <repo-relative-path>`
+with branch or commit mode. It reads the exact regular-file blob from the frozen
+reviewed commit (branch HEAD or `--commit`), including executable source files.
+Local mode, including an auto-selected local target, is unsupported. No separate
+context revision or working-copy substitution is accepted. The checkout path must
+remain a regular file; its bytes and path topology are revalidated throughout review.
+Repeated normalized source-context paths share one capture after every argument
+is validated; different paths and evidence roles remain distinct.
+
+This role uses tracked-source filename classification, so source names such as
+`src/token_count.py` are accepted. Credential directories, stores and keyfiles
+remain forbidden. Existing prompt-file and dataset restrictions are unchanged.
+Every source fragment carries path, commit, blob and mode provenance. Complete
+bytes are partitioned with the change when needed; context never adds finding
+targets. This is a source-provenance contract, not secret-content scanning.
+
+```bash
+"$AUTOREVIEW" --mode branch --base origin/main --source-context src/token_count.py
+```
+
 The default threshold is **P0 only**: material blockers to normal operation or
 safety. Use `--max-priority P1`, `P2`, or `P3` when the caller requests a wider
 review. Do not add unrelated redesign goals or prescribe file counts, reading
