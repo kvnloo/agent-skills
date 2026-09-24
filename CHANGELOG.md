@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add Autoreview `--source-context-file` to keep explicitly selected committed source intact in every pass, with the existing provenance, mutation, path and finding-scope guards and unchanged prompt limits.
 - Split Windows Autoreview hardening validation into two deterministic test-ID shards, preserving the full test union, aggregate local commands and existing job timeouts.
 - Keep complete Autoreview evidence in every change partition when it leaves sufficient change space, before splitting datasets or optimizing their allocation; preserve feasible terminal plans when batch framing cannot fit.
 - Split Windows skill validation into core, hardening, and boundary jobs while retaining the complete default check sequence and existing job timeouts.
